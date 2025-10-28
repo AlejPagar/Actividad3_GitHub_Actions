@@ -1,0 +1,27 @@
+name: Actividad 3 GitHub Actions
+
+on:
+  push:
+
+jobs:
+  generar-codigo:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout del repositorio
+        uses: actions/checkout@v4
+
+      - name: setup java
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Ejecutar jar
+        run: java -jar openapi-generator-cli.jar generate -i api.yaml -g pythonflask -o ./openapi_server
+
+      - name: Comprimir
+        run: zip -r openapi_server.zip openapi_server
+
+      - name: subir al repositorio
+        uses: actions/upload-artifact@v4 openapi_server.zip

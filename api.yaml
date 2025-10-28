@@ -1,0 +1,270 @@
+openapi: 3.0.1
+info:
+  title: UnderSounds - Servicio Compras
+  version: 1.0.0
+  description: |-
+    Especificación OpenAPI para el servicio de compras de UnderSounds.
+servers:
+  - url: https://www.undersounds.com/api/v1/compras
+tags:
+  - name: orders
+    description: Operaciones sobre pedidos
+  - name: webhooks
+    description: Webhooks para comunicación con servicios de terceros
+paths:
+  /orders:
+    get:
+      tags:
+        - orders
+      summary: Obtener pedidos.
+      description: Devuelve un listado de pedidos según los filtros especificados.
+      operationId: getOrders
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: userId
+          in: query
+          description: Identificador del usuario comprador.
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - name: minCreationDate
+          in: query
+          description: Fecha mínima de creación.
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: maxCreationDate
+          in: query
+          description: Fecha máxima de creación.
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: minTotal
+          in: query
+          description: Precio total mínimo en céntimos.
+          required: false
+          schema:
+            type: integer
+            format: int64
+        - name: maxTotal
+          in: query
+          description: Precio total máximo en céntimos.
+          required: false
+          schema:
+            type: integer
+            format: int64
+        - name: status
+          in: query
+          description: Estado del pedido.
+          schema:
+            type: string
+            enum:
+              - pending
+              - paid
+              - shipped
+              - delivered
+              - cancelled
+        - name: page
+          in: query
+          description: Número de página (por defecto, 1).
+          required: false
+          schema:
+            type: integer
+            format: int64
+        - name: items
+          in: query
+          description: Número de elementos por página (por defecto, 20; máximo 100).
+          required: false
+          schema:
+            type: integer
+            format: int64
+        - name: orderBy
+          in: query
+          description: Criterio de orden de los elementos (por defecto, fecha de creación).
+          required: false
+          schema:
+            type: string
+            enum:
+              - creationDate
+              - userId
+              - total
+        - name: orderDirection
+          in: query
+          description: Dirección del orden (por defecto, descendente).
+          required: false
+          schema:
+            type: string
+            enum:
+              - asc
+              - desc
+      responses:
+        '200':
+          description: Pedidos obtenidos con éxito.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: 'schemas/Order.yaml'
+        '401':
+          description: Usuario sin permiso para ver los pedidos.
+          content:
+            application/json:
+              schema:
+                $ref: 'schemas/Error.yaml'
+        '500':
+          description: Error interno.
+          content:
+            application/json:
+              schema:
+                $ref: 'schemas/Error.yaml'
+    post:
+      tags:
+        - orders
+      summary: Crear un nuevo pedido.
+      description: Crea un nuevo pedido para el usuario autenticado.
+      operationId: postOrder
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: 'schemas/Order.yaml'
+      responses:
+        '201':
+          description: Pedido creado con éxito.
+          content:
+            application/json:
+              schema:
+                $ref: 'schemas/Order.yaml'
+        '400':
+          description: Información inválida o incompleta.
+          content:
+            application/json:
+              schema:
+                $ref: 'schemas/Error.yaml'
+        '401':
+          description: Usuario sin permiso para crear un pedido.
+          content:
+            application/json:
+              schema:
+                $ref: 'schemas/Error.yaml'
+        '500':
+          description: Error interno.
+          content:
+            application/json:
+              schema:
+                $ref: 'schemas/Error.yaml'
+
+  /orders/{id}:
+    get:
+      tags:
+        - orders
+      summary: Obtener un pedido por su ID.
+      description: Devuelve la información del pedido solicitado.
+      operationId: getOrderById
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          description: ID del pedido a devolver.
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Pedido recuperado con éxito.
+          content:
+            application/json:
+              schema:
+                $ref: 'schemas/Order.yaml'
+        '401':
+          description: Usuario sin permiso para ver el pedido.
+          content:
+            application/json:
+              schema:
+                $ref: 'schemas/Error.yaml'
+        '404':
+          description: Pedido no encontrado.
+        '500':
+          description: Error interno.
+          content:
+            application/json:
+              schema:
+                $ref: 'schemas/Error.yaml'
+
+  /webhooks/stripe:
+    post:
+      tags:
+        - webhooks
+      summary: Webhook para eventos de Stripe.
+      description: Endpoint establecido como webhook en la API de Stripe.
+      operationId: stripeWebhook
+      parameters:
+        - name: stripe-signature
+          description: Firma de Stripe para validar el origen de la llamada.
+          in: header
+          schema:
+            type: string
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: string
+                  description: ID del evento de Stripe
+                type:
+                  type: string
+                  description: Tipo de evento de Stripe
+                  example: checkout.session.completed
+                data:
+                  type: object
+                  properties:
+                    object:
+                      type: object
+                      description: Objeto del evento (PaymentIntent)
+      responses:
+        '200':
+          description: Evento procesado con éxito.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  received:
+                    type: boolean
+                    example: true
+        '400':
+          description: Error de validación de firma.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '500':
+          description: Error interno.
+          content:
+            application/json:
+              schema:
+                $ref: 'schemas/Error.yaml'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
