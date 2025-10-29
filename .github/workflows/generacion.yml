@@ -18,7 +18,7 @@ jobs:
           distribution: 'temurin'
 
       - name: Ejecutar jar
-        run: java -jar openapi-generator-cli.jar generate -i api.yaml -g pythonflask -o ./openapi_server
+        run: java -jar openapi-generator-cli.jar generate -i api.yaml -g python-flask -o ./openapi_server
 
       - name: Comprimir
         run: zip -r openapi_server.zip openapi_server
