@@ -104,10 +104,6 @@ paths:
       responses:
         '200':
           description: Pedidos obtenidos con éxito.
-          content:
-            application/json:
-              schema:
-                type: array
 
         '401':
           description: Usuario sin permiso para ver los pedidos.
