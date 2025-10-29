@@ -108,20 +108,13 @@ paths:
             application/json:
               schema:
                 type: array
-                items:
-                  $ref: 'schemas/Order.yaml'
+
         '401':
           description: Usuario sin permiso para ver los pedidos.
-          content:
-            application/json:
-              schema:
-                $ref: 'schemas/Error.yaml'
+
         '500':
           description: Error interno.
-          content:
-            application/json:
-              schema:
-                $ref: 'schemas/Error.yaml'
+
     post:
       tags:
         - orders
@@ -130,37 +123,21 @@ paths:
       operationId: postOrder
       security:
         - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: 'schemas/Order.yaml'
+
+
       responses:
         '201':
           description: Pedido creado con éxito.
-          content:
-            application/json:
-              schema:
-                $ref: 'schemas/Order.yaml'
+
         '400':
           description: Información inválida o incompleta.
-          content:
-            application/json:
-              schema:
-                $ref: 'schemas/Error.yaml'
+
         '401':
           description: Usuario sin permiso para crear un pedido.
-          content:
-            application/json:
-              schema:
-                $ref: 'schemas/Error.yaml'
+
         '500':
           description: Error interno.
-          content:
-            application/json:
-              schema:
-                $ref: 'schemas/Error.yaml'
+
 
   /orders/{id}:
     get:
@@ -182,24 +159,14 @@ paths:
       responses:
         '200':
           description: Pedido recuperado con éxito.
-          content:
-            application/json:
-              schema:
-                $ref: 'schemas/Order.yaml'
+
         '401':
           description: Usuario sin permiso para ver el pedido.
-          content:
-            application/json:
-              schema:
-                $ref: 'schemas/Error.yaml'
+
         '404':
           description: Pedido no encontrado.
         '500':
           description: Error interno.
-          content:
-            application/json:
-              schema:
-                $ref: 'schemas/Error.yaml'
 
   /webhooks/stripe:
     post:
@@ -257,10 +224,7 @@ paths:
                     type: string
         '500':
           description: Error interno.
-          content:
-            application/json:
-              schema:
-                $ref: 'schemas/Error.yaml'
+
 
 components:
   securitySchemes:
