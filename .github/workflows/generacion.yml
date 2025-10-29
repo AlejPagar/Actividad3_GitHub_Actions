@@ -24,4 +24,7 @@ jobs:
         run: zip -r openapi_server.zip openapi_server
 
       - name: subir al repositorio
-        uses: actions/upload-artifact@v5 openapi_server.zip
+        uses: actions/upload-artifact@v4
+        with:
+          name: jar
+          path: openapi_server.zip
